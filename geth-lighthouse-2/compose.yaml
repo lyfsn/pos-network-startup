@@ -1,0 +1,91 @@
+version: "3.8"
+
+services:
+  execution:
+    image: ethereum/client-go:latest
+    command:
+      - --networkid=38356
+      - --state.scheme=path
+      - --verbosity=3
+      - --datadir=/execution-data
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.port=8545
+      - --http.vhosts=*
+      - --http.corsdomain=*
+      - --http.api=admin,engine,net,eth,web3,debug
+      - --ws
+      - --ws.addr=0.0.0.0
+      - --ws.port=8546
+      - --ws.api=admin,engine,net,eth,web3,debug
+      - --ws.origins=*
+      - --allow-insecure-unlock
+      - --nat=extip:${IP_ADDRESS}
+      - --authrpc.port=8551
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.vhosts=*
+      - --authrpc.jwtsecret=/el-cl-genesis-data/jwt/jwtsecret
+      - --syncmode=full
+      - --rpc.allow-unprotected-txs
+      - --metrics
+      - --metrics.addr=0.0.0.0
+      - --metrics.port=6060
+      - --port=31303
+      - --discovery.port=31303
+      - --bootnodes=${EL_BOOTNODES}
+    volumes:
+      - ./execution-data:/execution-data
+      - ./el-cl-genesis-data:/el-cl-genesis-data
+    ports:
+      - "9545:8545" 
+      - "9546:8546" 
+      - "9551:8551" 
+      - "7060:6060" 
+      - "31303:31303/tcp"
+      - "31303:31303/udp"
+    restart: unless-stopped
+
+  beacon:
+    image: sigp/lighthouse:latest
+    command:
+      - lighthouse
+      - beacon_node
+      - --debug-level=info
+      - --datadir=/consensus-data
+      - --testnet-dir=/el-cl-genesis-data/custom_config_data
+      - --enr-address=${IP_ADDRESS}
+      - --enr-udp-port=10000
+      - --enr-tcp-port=10000
+      - --enr-quic-port=10001
+      - --listen-address=0.0.0.0
+      - --port=10000
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=5052
+      - --http-allow-sync-stalled
+      - --execution-endpoints=http://execution:8551
+      - --jwt-secrets=/el-cl-genesis-data/jwt/jwtsecret
+      - --suggested-fee-recipient=0x6D39C4E60dEf1DfC6d09A8FdB5D075e85F0e5F8d
+      - --subscribe-all-subnets
+      - --import-all-attestations
+      - --metrics
+      - --metrics-address=0.0.0.0
+      - --metrics-allow-origin=*
+      - --metrics-port=5054
+      - --disable-peer-scoring
+      - --trusted-peers=${CL_TRUSTPEERS}
+      - --boot-nodes=${CL_BOOTNODES}
+      - --checkpoint-sync-url=${CL_CHECKPOINT}
+    volumes:
+      - ./consensus-data:/consensus-data 
+      - ./el-cl-genesis-data:/el-cl-genesis-data
+    ports:
+      - "10000:10000/tcp"
+      - "10000:10000/udp"
+      - "10001:10001/udp"
+      - "6052:5052"
+      - "6054:5054"
+    depends_on:
+      - execution
+    restart: unless-stopped
+
