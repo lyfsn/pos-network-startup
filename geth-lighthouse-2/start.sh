@@ -2,7 +2,15 @@
 
 
 export NODE1_ADDRESS=127.0.0.1
-export IP_ADDRESS=127.0.0.1
+
+export IP_ADDRESS=$(curl -4 https://icanhazip.com/)
+
+if [ -z "$IP_ADDRESS" ]; then
+    echo "Failed to retrieve IP address"
+    exit 1
+fi
+
+echo "Using IP address: $IP_ADDRESS"
 
 RESPONSE_EL=$(curl -m 1 -s -X POST -H "Content-Type: application/json" --data @el.request.json http://$NODE1_ADDRESS:8545)
 ENODE=$(echo $RESPONSE_EL | jq -r '.result.enode')

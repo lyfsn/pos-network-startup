@@ -7,6 +7,6 @@ docker run \
   -v $(pwd)/el-cl-genesis-data:/el-cl-genesis-data \
   -p 9777:8080 \
   -it pk910/dora-the-explorer:latest \
-  -config=/config/local.yaml
+  -config=/config/config.yaml
 
 

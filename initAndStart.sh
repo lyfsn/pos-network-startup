@@ -7,8 +7,8 @@ cd ../geth-lighthouse-1
 ./clear.sh
 ./cpGenesisData.sh
 ./initExecution.sh
-./start.local.sh
+./start.sh
 
 cd ../dora
 ./cpGenesisData.sh
-./start.local.sh
+./start.sh
